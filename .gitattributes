@@ -1,0 +1,2 @@
+# Use LF for all text files so the repo is consistent for Linux execution
+* text=auto eol=lf
