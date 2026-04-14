@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:dnayak-lattice/ktlib.git
+	branch = main
+	commit = 6f43d65df661796f06d7a85beaae19ec4442adc0
+	parent = 373ba6938eb2dbd03ffcf8b3039273e367ca61f1
+	method = merge
+	cmdver = 0.4.9
