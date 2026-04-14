@@ -11,7 +11,7 @@
 #include "utils.h"	
 
 /* Make changes for versioning here - do not change any other lines */
-#define HUB_VERSION_MAJOR  2
+#define HUB_VERSION_MAJOR  3
 #define HUB_VERSION_MINOR  0
 #define HUB_VERSION_BUGFIX 0
 /* Make changes for versioning here - do not change any other lines */
