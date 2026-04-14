@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:dnayak-lattice/libhub.git
+	branch = main
+	commit = 183f683b5cb22c9aba1808bf996ce10f4fc403b1
+	parent = 11072d4c57b5d1a9ed7a9d2686e567cc0bd7c2ab
+	method = merge
+	cmdver = 0.4.9
