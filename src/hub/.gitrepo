@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:dnayak-lattice/libhub.git
 	branch = main
-	commit = 183f683b5cb22c9aba1808bf996ce10f4fc403b1
-	parent = 11072d4c57b5d1a9ed7a9d2686e567cc0bd7c2ab
+	commit = b1b9c093e0d2eb1592934339eb46e32638ccbb4d
+	parent = d05783feb820419755655c6f243086ead7ee6f41
 	method = merge
 	cmdver = 0.4.9
