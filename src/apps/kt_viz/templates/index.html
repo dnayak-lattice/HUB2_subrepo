@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katana Visualizer</title>
+    <!-- Bbox / ideal UI colors: config.json → face_overlay (served by /api/config, applied in script.js) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/fontawesome/css/all.css">
+</head>
+
+<body>
+    <!-- Loading Animation Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="lattice-loader">
+            <div class="lattice-grid">
+                <div class="lattice-cube cube-1"></div>
+                <div class="lattice-cube cube-2"></div>
+                <div class="lattice-cube cube-3"></div>
+                <div class="lattice-cube cube-4"></div>
+                <div class="lattice-cube cube-5"></div>
+                <div class="lattice-cube cube-6"></div>
+                <div class="lattice-cube cube-7"></div>
+                <div class="lattice-cube cube-8"></div>
+                <div class="lattice-cube cube-9"></div>
+            </div>
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+
+    <header class="site-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="/static/lattice-logo-white.png" alt="Lattice Semiconductor Logo" class="logo-img">
+            </div>
+            <div class="main-header-title">Katana Visualizer</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+                <button id="info-btn" class="header-icon-btn" title="Application Information">
+                    <i class="fas fa-info-circle"></i>
+                </button>
+                <button id="circuit-view-btn" class="header-icon-btn" title="View Architecture Diagram">
+                    <i class="fas fa-microchip"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <main id="main-content" class="main-content">
+            <section id="tab-content">
+                <div class="tab-panel" id="live-streaming-panel">
+                    <div class="live-streaming-content">
+
+                        <!-- ── LEFT COLUMN ── -->
+                        <div class="ls-left-col">
+
+                            <!-- Video header: title centre, stream buttons right -->
+                            <div class="ls-video-header">
+                                <span class="ls-cam-title active" id="clnx-camera-title">Live Video Feed through CLNX USB Camera</span>
+
+                                <div class="ls-cam-stream-btns active" data-cam-ctrl="clnx">
+                                    <button class="start-stream-btn stream-btn start" data-camera="clnx">
+                                        <i class="fas fa-play"></i> Start Stream
+                                    </button>
+                                    <button class="stop-stream-btn stream-btn stop is-hidden" data-camera="clnx">
+                                        <i class="fas fa-stop"></i> Stop Stream
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- CLNX Video Panel -->
+                            <div class="camera-panel active" id="clnx-camera-panel">
+                                <div class="video-player-container">
+                                    <img class="live-video" id="clnx-video" src="" />
+                                    <p class="camera-stopped-msg">Camera stopped &mdash; click Start Stream to view.</p>
+                                </div>
+                            </div>
+
+                        </div><!-- /.ls-left-col -->
+
+                        <!-- ── RIGHT BAR ── -->
+                        <div class="ls-right-bar">
+
+                            <!-- Register Face Id block -->
+                            <div class="sidebar-block register-block">
+                                <div class="sidebar-block-header">
+                                    <i class="fas fa-id-badge"></i> Register Face Id
+                                </div>
+                                <button class="gen-face-id-btn rp-btn rp-btn-register" data-camera="clnx">
+                                    <i class="fas fa-plus-circle"></i> Register
+                                </button>
+                            </div>
+
+                            <!-- Registered Profiles block -->
+                            <div class="sidebar-block profiles-block">
+                                <button class="rp-profiles-toggle" id="clnx-profiles-toggle">
+                                    <span class="rp-profiles-toggle-left">
+                                        <i class="fas fa-users"></i> Registered Profiles
+                                    </span>
+                                    <span class="rp-profiles-toggle-right">
+                                        <span class="rp-profiles-count" id="clnx-profiles-count"></span>
+                                        <i class="fas fa-chevron-down rp-profiles-chevron"></i>
+                                    </span>
+                                </button>
+                                <div class="rp-profiles-dropdown" id="clnx-profiles-dropdown">
+                                    <div class="rp-profiles-loader" id="clnx-profiles-loader">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading&hellip;
+                                    </div>
+                                    <div class="rp-profiles-empty" id="clnx-profiles-empty" style="display:none;">
+                                        <i class="fas fa-user-slash"></i>
+                                        <span>No profiles registered yet</span>
+                                    </div>
+                                    <div class="rp-profiles-list" id="clnx-profiles-list" style="display:none;"></div>
+                                </div>
+                            </div>
+
+                        </div><!-- /.ls-right-bar -->
+
+                    </div><!-- /.live-streaming-content -->
+                </div><!-- /.tab-panel -->
+            </section>
+        </main>
+
+        <div id="circuit-viewer" class="circuit-viewer hidden">
+            <div class="circuit-viewer-content">
+                <button id="close-circuit-btn" class="close-circuit-btn" title="Close Circuit Viewer">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="circuit-image-container">
+                    <img src="/static/architecture-diagram.svg" alt="Architecture Diagram" class="circuit-image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="info-modal" class="threshold-modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content info-modal-content">
+            <div class="modal-header">
+                <h3 id="info-modal-title"><i class="fas fa-info-circle" style="margin-right:10px;"></i>Application Information</h3>
+                <button class="modal-close" id="info-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-modal-body" id="info-modal-body"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-save" id="info-modal-ok">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="face-id-modal" class="fid-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="fid-title">
+        <div class="fid-dialog">
+            <h2 class="fid-title" id="fid-title"><i class="fas fa-id-badge"></i> Face ID Generated</h2>
+            <div class="fid-body">
+                <div class="fid-row">
+                    <span class="fid-label">Face ID</span>
+                    <span class="fid-value" id="fid-id-val">&mdash;</span>
+                </div>
+                <div class="fid-row" style="display:none;">
+                    <span class="fid-label">Bounding Box (pixels)</span>
+                    <div class="fid-coords-grid">
+                        <span class="fid-coord-label">Left :</span><span class="fid-coord-val" id="fid-left-val">&mdash;</span>
+                        <span class="fid-coord-label">Top :</span><span class="fid-coord-val" id="fid-top-val">&mdash;</span>
+                        <span class="fid-coord-label">Right :</span><span class="fid-coord-val" id="fid-right-val">&mdash;</span>
+                        <span class="fid-coord-label">Bottom :</span><span class="fid-coord-val" id="fid-bottom-val">&mdash;</span>
+                    </div>
+                </div>
+                <div class="fid-row fid-name-row" id="fid-name-row" style="display:none;">
+                    <label class="fid-label" for="fid-name-input">Enter Name</label>
+                    <input id="fid-name-input" class="fid-input" type="text"
+                           placeholder="e.g. John Doe" maxlength="80"
+                           autocomplete="off" autocorrect="off" spellcheck="false" />
+                </div>
+            </div>
+            <div class="fid-footer">
+                <button id="fid-cancel-btn" class="fid-btn fid-btn-cancel">Cancel</button>
+                <button id="fid-ok-btn" class="fid-btn fid-btn-ok"><i class="fas fa-check"></i> OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fid-confirm-overlay" class="fid-overlay" style="display:none;" role="dialog" aria-modal="true">
+        <div class="fid-dialog fid-confirm-dialog">
+            <div class="fid-confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 class="fid-confirm-title" id="fid-confirm-title">Are you sure?</h3>
+            <p class="fid-confirm-msg" id="fid-confirm-msg">This action cannot be undone.</p>
+            <div class="fid-footer fid-confirm-footer">
+                <button id="fid-confirm-cancel" class="fid-btn fid-btn-cancel"><i class="fas fa-times"></i> Cancel</button>
+                <button id="fid-confirm-ok" class="fid-btn fid-btn-danger"><i class="fas fa-trash-alt"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fid-notif-overlay" class="fid-overlay fid-notif-overlay" style="display:none;" aria-live="assertive">
+        <div class="fid-dialog fid-notif-dialog">
+            <div class="fid-notif-icon" id="fid-notif-icon"><i class="fas fa-check-circle"></i></div>
+            <p class="fid-notif-msg" id="fid-notif-msg">Done.</p>
+        </div>
+    </div>
+
+    <div id="del-face-modal" class="fid-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="del-fid-title">
+        <div class="fid-dialog del-fid-dialog">
+            <h2 class="fid-title" id="del-fid-title"><i class="fas fa-users"></i> Registered Face Profiles</h2>
+            <div class="fid-body del-fid-body">
+                <div id="del-fid-loading" class="del-fid-loading">
+                    <i class="fas fa-spinner fa-spin"></i>&nbsp; Loading profiles&hellip;
+                </div>
+                <div id="del-fid-empty" class="del-fid-empty" style="display:none;">
+                    <i class="fas fa-user-slash" style="font-size:2.4rem;margin-bottom:14px;color:#444;"></i>
+                    <p>No face profiles registered yet.</p>
+                </div>
+                <div id="del-fid-table-wrap" class="del-fid-table-wrap" style="display:none;">
+                    <table class="del-fid-table">
+                        <thead>
+                            <tr>
+                                <th class="col-id">#&nbsp;Face ID</th>
+                                <th class="col-name">Name</th>
+                                <th class="col-action">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="del-fid-tbody"></tbody>
+                    </table>
+                    <div id="del-fid-count" class="del-fid-count"></div>
+                </div>
+            </div>
+            <div class="fid-footer">
+                <button id="del-fid-refresh-btn" class="fid-btn fid-btn-refresh">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button id="del-fid-close-btn" class="fid-btn fid-btn-cancel"><i class="fas fa-times"></i> Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
+
